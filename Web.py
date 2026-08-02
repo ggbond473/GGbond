@@ -8,8 +8,10 @@ import os
 
 # Load the model
 model = joblib.load("xgb_model.pkl")
+# 修正：Envelop.invasion 改为 Capsular Invasion，和论文术语统一
 feature_names = [
-    "Calcification", "Envelop.invasion", "Margin", "Age", "Diameter"]
+    "Calcification", "Capsular Invasion", "Margin", "Age", "Diameter"
+]
 
 # Streamlit user interface
 st.title("Predictor of Skip metastasis in papillary thyroid cancer (Non-menopausal Group)")
@@ -17,8 +19,8 @@ st.title("Predictor of Skip metastasis in papillary thyroid cancer (Non-menopaus
 # Calcification: categorical selection (1=Yes, 0=No)
 Calcification = st.selectbox("Calcification:", options=[0, 1], format_func=lambda x: 'No (0)' if x == 0 else 'Yes (1)')
 
-# Envelop.invasion: categorical selection (1=Yes, 0=No)
-Envelop_invasion = st.selectbox("Envelop.invasion:", options=[0, 1], format_func=lambda x: 'No (0)' if x == 0 else 'Yes (1)')
+# 界面文字同步修改：Envelop.invasion → Capsular Invasion
+Capsular_Invasion = st.selectbox("Capsular Invasion:", options=[0, 1], format_func=lambda x: 'No (0)' if x == 0 else 'Yes (1)')
 
 # Margin: categorical selection (0=Clear, 1=Ill-defined)
 Margin = st.selectbox("Margin:", options=[0, 1], format_func=lambda x: 'Clear (0)' if x == 0 else 'Ill-defined (1)')
@@ -30,7 +32,8 @@ Age = st.number_input("Age (years):", min_value=1, max_value=100, value=45, step
 Diameter = st.number_input("Max Diameter (mm):", min_value=0.1, max_value=200.0, value=10.0, step=0.1)
 
 # Process inputs and make predictions
-feature_values = [Calcification, Envelop_invasion, Margin, Age, Diameter]
+# 列表顺序和feature_names严格对应
+feature_values = [Calcification, Capsular_Invasion, Margin, Age, Diameter]
 features = np.array([feature_values])
 
 if st.button("Predict"):
@@ -70,5 +73,5 @@ if st.button("Predict"):
 
     shap.force_plot(explainer.expected_value, shap_values[0], pd.DataFrame([feature_values], columns=feature_names), matplotlib=True)
     plt.savefig("shap_force_plot.png", bbox_inches='tight', dpi=1200)
-
+    plt.close() # 新增：释放画布，避免多次运行内存堆积
     st.image("shap_force_plot.png")
